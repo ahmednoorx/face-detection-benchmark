@@ -1,44 +1,61 @@
-# Face Detection Benchmark (MediaPipe vs InsightFace)
+# Face Detection Benchmark: MediaPipe vs InsightFace
 
-A reproducible benchmark comparing MediaPipe, MTCNN, and InsightFace on a 30-image real-world set. Includes CPU and Colab GPU runs, annotated outputs, and a clear speed/accuracy trade-off story you can hand to stakeholders.
+A systematic performance comparison of MediaPipe and InsightFace face detection models on a 30-image dataset. This project evaluates detection accuracy, speed, and GPU acceleration to guide model selection for real-world applications.
 
-## What’s inside
-- `benchmark_detectors.py` — main runner for CPU benchmarks on the local image set.
-- `BENCHMARK_RESULTS.md` — per-image table plus summary stats and GPU callout.
-- `BENCHMARK_README.md` — detailed quick start and supervisor talking points.
-- `GPU_Benchmark_Colab.ipynb` — Colab notebook to rerun InsightFace on GPU with the exact same images.
-- `benchmark_outputs/` — annotated detections (MediaPipe + InsightFace) for visual proof.
-- `benchmark_images/` — the 30-image input set used for the reported numbers.
+## Overview
+Face detection is critical for applications ranging from security systems to photo management. This benchmark compares two leading detectors:
+- **MediaPipe**: Google's lightweight, real-time solution
+- **InsightFace**: Deep learning-based detector optimized for accuracy
 
-## Headline results
-- MediaPipe (CPU): ~125 FPS, detected 28/30 images (missed 2 profile/low-light cases).
-- InsightFace (CPU): 2.6 FPS, detected 30/30 images, caught extra faces in multi-person shots.
-- InsightFace (GPU, T4): 5.8 FPS (0.172s/image), **2.2× faster** vs CPU while keeping 100% recall.
+The evaluation uses 30 real-world images with diverse conditions (lighting, angles, occlusions, group photos) and measures both CPU and GPU performance.
 
-## How to reproduce (CPU)
-```powershell
+## Repository Contents
+- `benchmark_detectors.py` — Main script to run CPU benchmarks
+- `GPU_Benchmark_Colab.ipynb` — Colab notebook for GPU evaluation (T4/P100/V100)
+- `BENCHMARK_RESULTS.md` — Detailed per-image results table with timing and detection counts
+- `BENCHMARK_README.md` — Setup instructions and methodology
+
+## Key Findings
+
+### CPU Performance
+| Detector | Images Detected | Avg FPS | Total Faces Found |
+|----------|----------------|---------|-------------------|
+| MediaPipe | 28/30 (93%) | 125 | 29 |
+| InsightFace | 30/30 (100%) | 2.6 | 32 |
+
+**MediaPipe** excels at speed (~125 FPS) but missed 2 images with challenging conditions (profile angles, low light).
+
+**InsightFace** achieved 100% image detection and identified all faces in multi-person scenes, including cases MediaPipe missed, at the cost of slower processing (2.6 FPS on CPU).
+
+### GPU Acceleration
+Running InsightFace on a **T4 GPU** delivered:
+- **5.8 FPS** (0.172s per image)
+- **2.2× speedup** over CPU (0.378s → 0.172s)
+- Same 100% detection accuracy maintained
+
+## Methodology
+1. **Dataset**: 30 diverse real-world images (frontal, profile, groups, occlusions)
+2. **Environment**: Python 3.11, OpenCV, tested on CPU (local) and T4 GPU (Google Colab)
+3. **Metrics**: Detection rate (images with ≥1 face found), face count, per-image latency
+4. **Reproducibility**: Same image set used for CPU and GPU runs to ensure fair comparison
+
+## Setup & Reproduction
+```bash
+# Create environment
 conda create -n vision-bench python=3.11 -y
 conda activate vision-bench
-pip install mediapipe mtcnn insightface onnxruntime opencv-python numpy
+pip install mediapipe insightface onnxruntime opencv-python numpy
+
+# Run CPU benchmark
 python benchmark_detectors.py
 ```
-Outputs: `BENCHMARK_RESULTS.md` and annotated images in `benchmark_outputs/`.
 
-## How to reproduce (GPU on Colab/Kaggle)
-1) Zip your `benchmark_images/` as `benchmark_images.zip` and upload when prompted.
-2) Open `GPU_Benchmark_Colab.ipynb`, set runtime to GPU (T4/P100/V100).
-3) Run all cells; the notebook reuses the uploaded images so CPU vs GPU is apples-to-apples.
+For GPU evaluation, open `GPU_Benchmark_Colab.ipynb` in Google Colab and follow the notebook instructions.
 
-## Data and sharing
-- Images are real photos (no synthetic). If publishing publicly, keep only a small CC0 sample and add a note that the full set is held privately for privacy/licensing.
-- Annotated outputs are in `benchmark_outputs/` (60 images total: 30 MediaPipe + 30 InsightFace).
+## Recommendations
+- **Real-time applications** (webcams, mobile): MediaPipe for speed
+- **High-accuracy needs** (security, analytics): InsightFace with GPU acceleration
+- **Hybrid approach**: MediaPipe for initial scan, InsightFace for verification
 
-## Suggested repo structure for GitHub
-- Keep this root `README.md` plus the two benchmark markdowns, scripts, and the Colab notebook.
-- Include a **small sample** of `benchmark_images/` (e.g., 5 CC0 photos) and note that the full set is private; optionally omit `benchmark_outputs/` or keep a few samples to reduce repo size.
-- Add a short cover note in your PR/commit message with the headline numbers and the key surprise: InsightFace catching the second face in `8.jpg`.
-
-## Quick talking points
-- Speed vs accuracy: MediaPipe for real-time light use; InsightFace for maximum recall (GPU recommended) or a hybrid pipeline.
-- Auditability: Every detection is visually reviewable via `benchmark_outputs/`.
-- GPU story: Moving InsightFace to a modest T4 roughly halves latency while keeping accuracy identical.
+## License
+MIT License - see individual library licenses for MediaPipe and InsightFace.
