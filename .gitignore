@@ -1,0 +1,20 @@
+# Environments and caches
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.log
+.DS_Store
+.ipynb_checkpoints/
+
+# Data and large artifacts (keep private or sample-only copies)
+benchmark_images/
+benchmark_images.zip
+benchmark_outputs/
+*.npz
+*.pkl
+chunk_embeddings.pkl
