@@ -14,6 +14,7 @@ The evaluation uses 30 real-world images with diverse conditions (lighting, angl
 - `GPU_Benchmark_Colab.ipynb` — Colab notebook for GPU evaluation (T4/P100/V100)
 - `BENCHMARK_RESULTS.md` — Detailed per-image results table with timing and detection counts
 - `BENCHMARK_README.md` — Setup instructions and methodology
+- `sample_outputs/` — Annotated detection examples showing key differences between detectors
 
 ## Key Findings
 
